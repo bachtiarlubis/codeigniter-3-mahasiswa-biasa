@@ -34,15 +34,15 @@
 		    return $query->result();
 		}
 
-		public function tambahDataMahasiswa($postData){
+		public function tambahDataMahasiswa(){
 			$data = [
-		        'nama' => $postData["nama"],
-		        'nim' => $postData["nim"],
-		        'email' => $postData["email"],
-		        'id_jurusan' => $postData["id_jurusan"]
+		        'nama' => $this->input->post("nama", true),
+		        'nim' => $this->input->post("nim", true),
+		        'email' => $this->input->post("email", true),
+		        'id_jurusan' => $this->input->post("jurusan", true)
 			];
 
-			return ($this->db->insert($this->tbl_mahasiswa, $data)) ? $this->db->insert_id()  :   false;
+			return ($this->db->insert($this->tbl_mahasiswa, $data)) ? $this->db->insert_id() : false;
 		}
 
 		public function hapusDataMahasiswa($id){

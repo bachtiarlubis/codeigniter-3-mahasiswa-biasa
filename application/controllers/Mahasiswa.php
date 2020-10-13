@@ -7,6 +7,8 @@
 			// load model
 			$this->load->model("Mahasiswa_model");
 			$this->load->model("Jurusan_model");
+
+			$this->load->library("form_validation");
 		}
 
 		public function index(){
@@ -46,26 +48,60 @@
 			$this->load->view("templates/footer");
 		}
 
+
 		public function tambah(){
+			$data = [
+				'judul' => 'Form Tambah Data Mahasiswa',
+				"jurusan" => $this->Jurusan_model->getAllJurusan()
+			];
 
-			if ($this->Mahasiswa_model->tambahDataMahasiswa($_POST) !== false) {
+			$this->form_validation->set_rules('nama', 'NAMA', 'trim|required',
+				['required' => "<b>%s</b> tidak boleh kosong !"]
+			);
+			$this->form_validation->set_rules('nim', 'NIM', 'trim|required|numeric',
+				[
+					'required' => "<b>%s</b> tidak boleh kosong !",
+					'numeric' => "<b>%s</b> harus angka !"
+				]
+			);
+			$this->form_validation->set_rules('email', 'EMAIL', 'trim|required|valid_email',
+				[
+					'required' => "<b>%s</b> tidak boleh kosong !",
+					'valid_email' => "<b>%s</b> tidak valid bambang !"
+				]
+			);
+			$this->form_validation->set_rules('jurusan', 'JURUSAN', 'trim|required',
+				['required' => "<b>%s</b> tidak boleh kosong !"]
+			);
+
+			// cek apakah gagal validasi input form
+			if ($this->form_validation->run() == FALSE) {
 				
-				// set session
-				$this->session->set_flashdata('status', 'success');
-				$this->session->set_flashdata('pesan', 'Data <b>'.$_POST["nim"].' '.$_POST["nama"].'</b> berhasil ditambahkan');
+				$this->load->view("templates/header", $data);
+				$this->load->view("mahasiswa/tambah");
+				$this->load->view("templates/footer");		
 
-				// redirect ke method index()
-				// header("location:".base_url("mahasiswa/index"));
-				redirect('mahasiswa/index');
-			}else{
-				// alert it we failed
-				// set session
-				$this->session->set_flashdata('status', 'danger');
-				$this->session->set_flashdata('pesan', 'Data <b>'.$_POST["nim"].' '.$_POST["nama"].'</b> gagal ditambahkan');
+			} else {
 
-				// redirect ke method index()
-				// header("location:".base_url("mahasiswa/index"));
-				redirect('mahasiswa/index');
+				// $postData = $this->input->post(); // dapat dipanggil langsung di model
+				// $updateData = $this->Mahasiswa_model->tambahDataMahasiswa($postData);
+				$insertData = $this->Mahasiswa_model->tambahDataMahasiswa();
+				if ($insertData !== false) {
+					
+					// set session
+					$this->session->set_flashdata('status', 'success');
+					$this->session->set_flashdata('pesan', 'Data <b>'.$this->input->post("nim", true).' '.$this->input->post("nama", true).'</b> berhasil ditambahkan');
+
+					redirect('mahasiswa/index');
+				}else{
+					// alert if we failed
+					// set session
+					$this->session->set_flashdata('status', 'danger');
+					$this->session->set_flashdata('pesan', 'Data <b>'.$this->input->post("nim", true).' '.$this->input->post("nama", true).'</b> gagal ditambahkan');
+
+					redirect('mahasiswa/index');
+				}
+
 			}
 		}
 
