@@ -23,13 +23,16 @@
 		    return $query->row();
 		}
 
-		public function getMahasiswaByName($name){
+		public function getMahasiswaByName($keywoard){
 
 			$this->db->select("{$this->tbl_mahasiswa}.*");
 		    $this->db->from($this->tbl_mahasiswa);
 		    $this->db->join($this->ref_jurusan, "{$this->tbl_mahasiswa}.id_jurusan = {$this->ref_jurusan}.id", 'inner');
 		    $this->db->join($this->ref_fakultas, "{$this->ref_jurusan}.id_fakultas = {$this->ref_fakultas}.id", 'inner');
-		    $this->db->like("{$this->tbl_mahasiswa}.nama", $name);
+		    $this->db->like("{$this->tbl_mahasiswa}.nama", $keywoard);
+		    $this->db->or_like("{$this->tbl_mahasiswa}.email", $keywoard);
+		    $this->db->or_like("{$this->tbl_mahasiswa}.nim", $keywoard);
+		    $this->db->or_like("{$this->ref_jurusan}.jurusan", $keywoard);
 		    $query = $this->db->get();
 		    return $query->result();
 		}
@@ -60,13 +63,13 @@
 			}
 		}
 
-		public function ubahDataMahasiswa($postData){
-			$id =  $postData["id_mhs"];
+		public function ubahDataMahasiswa(){
+			$id =  $this->input->post("id_mhs", true);
 			$data = array(
-		        'nama' => $postData["nama"],
-		        'nim' => $postData["nim"],
-		        'email' => $postData["email"],
-		        'id_jurusan' => $postData["id_jurusan"]
+		        'nama' => $this->input->post("nama", true),
+		        'nim' => $this->input->post("nim", true),
+		        'email' => $this->input->post("email", true),
+		        'id_jurusan' => $this->input->post("jurusan", true)
 			);
 
 			// $this->db->where('id', $id);

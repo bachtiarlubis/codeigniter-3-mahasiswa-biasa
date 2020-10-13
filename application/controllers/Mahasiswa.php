@@ -17,6 +17,11 @@
 				"mahasiswa" => $this->Mahasiswa_model->getAllMahasiswa(),
 				"jurusan" => $this->Jurusan_model->getAllJurusan()
 			];
+
+			// apabila menggunakan form pencarian
+			if ($this->input->post('keywoard')) {
+				$data['mahasiswa'] = $this->Mahasiswa_model->getMahasiswaByName($this->input->post('keywoard', true));
+			}
 			
 			$this->load->view("templates/header", $data);
 			$this->load->view("mahasiswa/index");
@@ -32,19 +37,6 @@
 
 			$this->load->view("templates/header", $data);
 			$this->load->view("mahasiswa/detail");
-			$this->load->view("templates/footer");
-		}
-
-		public function cari(){
-			$keywoard = $this->input->post('keywoard');
-			$data = [
-				"judul" => "Cari Mahasiswa",
-				"mahasiswa" => $this->Mahasiswa_model->getMahasiswaByName($keywoard),
-				"jurusan" => $this->Jurusan_model->getAllJurusan()
-			];
-
-			$this->load->view("templates/header", $data);
-			$this->load->view("mahasiswa/index");
 			$this->load->view("templates/footer");
 		}
 
@@ -74,9 +66,10 @@
 				['required' => "<b>%s</b> tidak boleh kosong !"]
 			);
 
-			// cek apakah gagal validasi input form
+			// cek apakah gagal validasi input form atau
+			// belum melakukan submit form
 			if ($this->form_validation->run() == FALSE) {
-				
+				// belum submit form / validasi input field belum terpenuhi
 				$this->load->view("templates/header", $data);
 				$this->load->view("mahasiswa/tambah");
 				$this->load->view("templates/footer");		
@@ -142,30 +135,68 @@
 			echo json_encode($data);
 		}
 
-		public function ubah(){
-			$postData = $this->input->post();
-			$updateData = $this->Mahasiswa_model->ubahDataMahasiswa($postData);
-			if ($updateData !== false) {
-				
-				// set session
-				$this->session->set_flashdata('status', 'success');
-				$this->session->set_flashdata('pesan', 'Data <b>'.$_POST["nim"].' '.$_POST["nama"].'</b> berhasil diubah');
+		public function ubah($id){
 
-				// redirect ke method index()
-				// header("location:".base_url("mahasiswa/index"));
-				redirect('mahasiswa/index');
-			}else{
-				// alert it we failed
-				// set session
-				$this->session->set_flashdata('status', 'danger');
-				$this->session->set_flashdata('pesan', 'Data <b>'.$_POST["nim"].' '.$_POST["nama"].'</b> gagal diubah');
+			$this->form_validation->set_rules('id_mhs', 'id', 'trim|required|numeric',
+				[
+					'required' => "<b>%s</b> tidak boleh kosong !",
+					'numeric' => "<b>%s</b> harus angka !"
+				]
+			);
+			$this->form_validation->set_rules('nama', 'NAMA', 'trim|required',
+				['required' => "<b>%s</b> tidak boleh kosong !"]
+			);
+			$this->form_validation->set_rules('nim', 'NIM', 'trim|required|numeric',
+				[
+					'required' => "<b>%s</b> tidak boleh kosong !",
+					'numeric' => "<b>%s</b> harus angka !"
+				]
+			);
+			$this->form_validation->set_rules('email', 'EMAIL', 'trim|required|valid_email',
+				[
+					'required' => "<b>%s</b> tidak boleh kosong !",
+					'valid_email' => "<b>%s</b> tidak valid bambang !"
+				]
+			);
+			$this->form_validation->set_rules('jurusan', 'JURUSAN', 'trim|required',
+				['required' => "<b>%s</b> tidak boleh kosong !"]
+			);
 
-				/*var_dump($postData);
-				var_dump($updateData);*/
+			// cek apakah gagal validasi input form atau
+			// belum melakukan submit form
+			if ($this->form_validation->run() == FALSE) {
+				$data = [
+					'judul' => 'Form Ubah Data Mahasiswa',
+					'mahasiswa' => $this->Mahasiswa_model->getMahasiswaById($id),
+					"jurusan" => $this->Jurusan_model->getAllJurusan()
+				];
 
-				// redirect ke method index()
-				// header("location:".base_url("mahasiswa/index"));
-				redirect('mahasiswa/index');
+				// belum submit form / validasi input field belum terpenuhi
+				$this->load->view("templates/header", $data);
+				$this->load->view("mahasiswa/ubah");
+				$this->load->view("templates/footer");		
+
+			} else {
+
+				// $postData = $this->input->post(); // dapat dipanggil langsung di model
+				// $updateData = $this->Mahasiswa_model->ubahDataMahasiswa($postData);
+				$insertData = $this->Mahasiswa_model->ubahDataMahasiswa();
+				if ($insertData !== false && !empty($this->input->post('id_mhs'))) {
+					
+					// set session
+					$this->session->set_flashdata('status', 'success');
+					$this->session->set_flashdata('pesan', 'Data <b>'.$this->input->post("nim", true).' '.$this->input->post("nama", true).'</b> berhasil diubah');
+
+					redirect('mahasiswa/index');
+				}else{
+					// alert if we failed
+					// set session
+					$this->session->set_flashdata('status', 'danger');
+					$this->session->set_flashdata('pesan', 'Data <b>'.$this->input->post("nim", true).' '.$this->input->post("nama", true).'</b> gagal diubah');
+
+					redirect('mahasiswa/index');
+				}
+
 			}
 		}
 	}

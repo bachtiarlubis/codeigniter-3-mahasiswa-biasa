@@ -3,7 +3,7 @@
 		
 	<div class="row mt-3">
 		<div class="col-lg-7">
-			<form action="<?= base_url("mahasiswa/cari"); ?>/keywoard" method="POST">
+			<form action="" method="POST">
 				<div class="input-group mb-3">
 					<input type="text" class="form-control" placeholder="cari mahasiswa..." name="keywoard" id="keywoard" autocomplete="off">
 					<div class="input-group-append">
@@ -38,6 +38,14 @@
 	<div class="row mt-3">
 		<div class="col-lg-7">
 			<h3 class="mt-1">Daftar Mahasiswa</h3>
+
+			<!-- Apabila data tidak ditemukan -->
+			<?php if(empty($mahasiswa)): ?>
+				<div class="alert alert-danger" role="alert">
+				  	Data tidak ditemukan !
+				</div>
+			<?php endif ?>
+
 			<ul class="list-group">
 				<?php foreach($mahasiswa as $mhs): ?>
 			  		<li class="list-group-item">
@@ -55,10 +63,11 @@
 			  					'nama_mhs' => html_escape($mhs->nama)
 			  				];
 			  			?>
-			  			<a href="#" onclick="sweetConfirm('Hapus data mahasiswa <?= $mhs->nama; ?> dengan nim <?= $mhs->nim ?>', 'Hapus', '<?= $frmId; ?>');" class="badge badge-danger badge-pill float-right ml-1">hapus</a>
+			  			<a href="#" onclick="sweetConfirm('Hapus data mahasiswa <?= $mhs->nama; ?> dengan nim <?= $mhs->nim ?>', 'hapus', '<?= $frmId; ?>');" class="badge badge-danger badge-pill float-right ml-1">hapus</a>
 			  			
 				  		<!-- proses ubah ada di js/my_script.js -->
-			  			<a href="" class="badge badge-warning badge-pill float-right ml-1">ubah</a>
+			  			<a href="<?= base_url("mahasiswa/ubah/".$mhs->id); ?>" class="badge badge-warning badge-pill float-right ml-1">ubah</a>
+			  			
 				  		<a href="<?= base_url("mahasiswa/detail/".$mhs->id); ?>" class="badge badge-primary badge-pill float-right ml-1">detail</a>
 		  			</li>
 		  			<?php
